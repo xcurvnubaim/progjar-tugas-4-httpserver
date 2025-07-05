@@ -15,16 +15,42 @@ httpserver = HttpServer()
 def ProcessTheClient(connection,address):
 		rcv=""
 		while True:
+			# logging.warning("menunggu data dari client")
 			try:
+				# logging.warning("menerima data dari client")
 				data = connection.recv(32)
+				# logging.warning("data dari client: {}" . format(data))
 				if data:
+					# logging.warning("data diterima dari client: {}" . format(data))
 					#merubah input dari socket (berupa bytes) ke dalam string
-					#agar bisa mendeteksi \r\n
-					d = data.decode()
+					#agar bisa mendeteksi \r\n\r\n
+					d = data.decode('utf-8', errors='surrogateescape')
 					rcv=rcv+d
-					if '\r\n' in rcv:
+					# logging.warning("data yang diterima: {}" . format(rcv))
+					if '\r\n\r\n' in rcv:
 						#end of command, proses string
-						#logging.warning("data dari client: {}" . format(rcv))
+						
+						# Check if there is header content length
+						content_length = 0
+						for line in rcv.split("\r\n"):
+							if line.lower().startswith("content-length:"):
+								try:
+									content_length = int(line.split(":", 1)[1].strip())
+								except ValueError:
+									content_length = 0
+								break
+						# If there is a body, read until full body is received
+						if content_length > 0:
+							headers_end = rcv.find("\r\n\r\n") + 4
+							body = rcv[headers_end:]
+							while len(body.encode('utf-8', errors='surrogateescape')) < content_length:
+								data = connection.recv(32)
+								if not data:
+									break
+								d = data.decode('utf-8', errors='surrogateescape')
+								body += d
+							rcv = rcv[:headers_end] + body
+
 						hasil = httpserver.proses(rcv)
 						#hasil akan berupa bytes
 						#untuk bisa ditambahi dengan string, maka string harus di encode
