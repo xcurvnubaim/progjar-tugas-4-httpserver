@@ -35,7 +35,7 @@ def make_secure_socket(destination_address='localhost', port=10000):
         logging.warning(f"error {str(ee)}")
 
 
-def send_command(command_str, server_address, is_secure=True):
+def send_command(command_str, server_address, is_secure=False):
     alamat_server = server_address[0]
     port_server = server_address[1]
     if is_secure == True:
@@ -121,12 +121,17 @@ def delete_command(server_address, filename):
 if __name__ == "__main__":
     server_addr = ('localhost', 8889)
     
+    print("===================LIST FILES===================")
     get_command(server_addr, '')
-    post_command(server_addr, 'test_upload.txt')
-    post_command(server_addr, 'donalbebek.jpg')
+    print("===================UPLOAD FILES===================")
+    # post_command(server_addr, 'test_upload.txt')
     delete_command(server_addr, 'test_upload.txt')
-    get_command(server_addr, 'donalbebek.jpg')
-    delete_command(server_addr, 'donalbebek.jpg')
-    get_command(server_addr, 'donalbebek.jpg')
-    get_command(server_addr, 'page.html')
+    # post_command(server_addr, 'donalbebek.jpg')
+    print("===================LIST FILES===================")
     get_command(server_addr, '')
+
+    # get_command(server_addr, 'donalbebek.jpg')
+    # delete_command(server_addr, 'donalbebek.jpg')
+    # get_command(server_addr, 'donalbebek.jpg')
+    # get_command(server_addr, 'page.html')
+    # get_command(server_addr, '')
