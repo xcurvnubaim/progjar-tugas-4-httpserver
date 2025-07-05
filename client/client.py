@@ -15,10 +15,33 @@ def make_socket(destination_address='172.16.16.101', port=8885):
         logging.warning(f"error {str(ee)}")
         return None
 
-def send_command(command_str, server_address):
+def make_secure_socket(destination_address='localhost', port=10000):
+    try:
+        # get it from https://curl.se/docs/caextract.html
+
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+        context.load_verify_locations(os.getcwd() + '/domain.crt')
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = (destination_address, port)
+        logging.warning(f"connecting to {server_address}")
+        sock.connect(server_address)
+        secure_socket = context.wrap_socket(sock, server_hostname=destination_address)
+        logging.warning(secure_socket.getpeercert())
+        return secure_socket
+    except Exception as ee:
+        logging.warning(f"error {str(ee)}")
+
+
+def send_command(command_str, server_address, is_secure=True):
     alamat_server = server_address[0]
     port_server = server_address[1]
-    sock = make_socket(alamat_server, port_server)
+    if is_secure == True:
+        sock = make_secure_socket(alamat_server, port_server)
+    else:
+        sock = make_socket(alamat_server, port_server)
     sock.settimeout(5)
     
     try:
